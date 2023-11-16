@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Registrace</title>
+    <link rel="stylesheet" href="/static/regcss.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+    var nickIsUnique = false;
+
+    $("#nick").on("input", function() {
+        var nick = $(this).val();
+        if(nick.length >= 2 && nick.length <= 20) {
+            $.ajax({
+                url: '/api/check-nickname/' + nick,
+                type: 'GET',
+                success: function(response) {
+                    if(response.isAvailable) {
+                        $("#nick").css("background-color", "green");
+                        nickIsUnique = true;
+                    } else {
+                        $("#nick").css("background-color", "red");
+                        nickIsUnique = false;
+                    }
+                }
+            });
+        } else {
+            $("#nick").css("background-color", "");
+            nickIsUnique = false;
+        }
+    });
+
+    $("#registraceForm").submit(function(event){
+        var jePlavec = $("input[name='je_plavec']:checked").val();
+        var nick = $("#nick").val();
+        var kanoeKamarad = $("#kanoe_kamarad").val();
+
+        if (jePlavec !== '1') {
+            alert("Pro registraci musíte být plavec.");
+            event.preventDefault();
+            return false;
+        }
+
+        if (!nickIsUnique || nick.length < 2 || nick.length > 20) {
+            alert("Nick musí být unikátní a mít 2 až 20 znaků.");
+            event.preventDefault();
+            return false;
+        }
+
+        if (kanoeKamarad && (kanoeKamarad.length < 2 || kanoeKamarad.length > 20)) {
+            alert("Jméno kamaráda musí mít 2 až 20 znaků.");
+            event.preventDefault();
+            return false;
+        }
+
+        // Pokud je vše v pořádku, formulář se odesílá
+        return true;
+    });
+});
+
+    </script>
+</head>
+<body>
+    <form id="registraceForm" method="post">
+        <label for="nick">Přezdívka:</label>
+        <input type="text" id="nick" name="nick" required><br>
+
+        <label>Umíte plavat?</label><br>
+        <input type="radio" id="plavec_ano" name="je_plavec" value="1" required>
+        <label for="plavec_ano">Ano</label><br>
+        <input type="radio" id="plavec_ne" name="je_plavec" value="0" required>
+        <label for="plavec_ne">Ne</label><br>
+
+        <label for="kanoe_kamarad">S kým byste chtěl být na lodi?</label>
+        <input type="text" id="kanoe_kamarad" name="kanoe_kamarad"><br>
+
+        <input type="submit" value="Odeslat">
+    </form>
+</body>
+</html>
